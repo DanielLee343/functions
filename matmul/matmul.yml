@@ -6,7 +6,7 @@ functions:
   matmul:
     lang: python3-debian
     handler: ./matmul
-    image: lyuze/matmul:0.4
+    image: lyuze/matmul:tmp
     environment:
       read_timeout: "5m"
       write_timeout: "5m"
