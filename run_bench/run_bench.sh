@@ -11,6 +11,7 @@ spin_single_func()
     rm -r ./$1_$2.csv
     # get python pid to be ignored
     pidIgnore=$(pidof python3)
+    pidIgnore=$(echo "$pidIgnore" | tr ' ' ',')
     # let the program run, wait for 0.05 sec for python to spin up
     cpus=""
     time curl http://127.0.0.1:8080/function/$1 -d '{"n":"'$2'"}' \
@@ -55,6 +56,7 @@ run_norm()
 {
     rm -r ./normal_run/$1_$2.csv
     pidIgnore=$(pidof python3)
+    pidIgnore=$(echo "$pidIgnore" | tr ' ' ',')
     cpus=""
     time python3 ./normal_run/$1.py $2 \
         & sleep 0.05
@@ -81,6 +83,7 @@ run_norm()
 get_func_cpu_usage() 
 {
     pidIgnore=$(pidof python3)
+    pidIgnore=$(echo "$pidIgnore" | tr ' ' ',')
     cpus=""
     time curl http://127.0.0.1:8080/function/$1 -d '{"n":"'$2'"}' \
         & sleep 0.05
@@ -99,16 +102,54 @@ get_func_cpu_usage()
     done
 }
 
-run_one_func_bench()
+get_numa_usage() 
 {
-    local func_name=$1
-    # 
-    for n in 15000 
+    local func=$1
+    local n=$2
+    local env=$3
+
+    rm -rf ./$func/$env\_$n.csv
+    pidIgnore=$(pidof python3)
+    pidIgnore=$(echo "$pidIgnore" | tr ' ' ',')
+    
+    sudo pcm-memory -csv=./$func/$env\_$n.csv -f -silent &
+    # let pcm spin up
+    sleep 2
+    date
+    time curl http://127.0.0.1:8080/function/$func -d '{"n":"'$n'"}' & \
+        sleep 0.1 
+    # pcmPid=$(echo $!)
+    # echo $pcmPid
+    # sleep 0.05
+    while :;
     do
-        echo "testing" $func_name with size $n
-        get_func_cpu_usage "$func_name" "$n"
+        check_pid=$(pidof python3 -o $pidIgnore)
+        if [ -z "$check_pid" ]; then
+            # sudo kill -9 $pcmPid
+            echo "killing pcm!!"
+            date
+            sleep 0.5
+            sudo pkill -9 pcm-memory
+            break
+        else
+            sleep 1
+        fi
     done
 }
 
-run_one_func_bench $1
+run_one_func_bench()
+{
+    local func=$1
+    local env=$2
+    for n in 15000
+    do
+        echo "testing" $func with size $n
+        get_numa_usage $func $n $env
+        sleep 2
+    done
+}
+
+# $1: function to run <matmul>
+# $2: env <base, cxl>
+run_one_func_bench $1 $2
 
