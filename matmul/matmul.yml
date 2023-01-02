@@ -6,7 +6,7 @@ functions:
   matmul:
     lang: python3-debian
     handler: ./matmul
-    image: lyuze/matmul:cxl
+    image: lyuze/matmul:0.2
     # limits:
     #   cpu: 1000m
     #   memory: 1024Mi
