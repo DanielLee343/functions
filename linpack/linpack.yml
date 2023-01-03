@@ -3,11 +3,10 @@ provider:
   name: openfaas
   gateway: http://127.0.0.1:8080
 functions:
-  pythoncon:
-    # fprocess: numactl --cpunodebind 0 --membind 1 -- python3 index.py
+  linpack:
     lang: python3-debian
-    handler: ./pythoncon
-    image: lyuze/pythoncon:0.2
+    handler: ./linpack
+    image: lyuze/linpack:cxl
     # limits:
     #   cpu: 1000m
     #   memory: 1024Mi
