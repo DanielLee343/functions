@@ -5,8 +5,6 @@ import sys
 # import mkl
 # import os
 
-
-
 # mkl.set_num_threads(1)
 
 def matmul(n):
