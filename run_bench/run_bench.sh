@@ -141,10 +141,11 @@ run_one_func_bench()
 {
     local func=$1
     local env=$2
-    for n in 15000
+    for n in 20000
     do
         echo "testing" $func with size $n
-        get_numa_usage $func $n $env
+        # get_numa_usage $func $n $env
+        get_func_cpu_usage $func $n
         sleep 2
     done
 }

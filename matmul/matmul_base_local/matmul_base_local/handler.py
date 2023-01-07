@@ -1,13 +1,6 @@
 import numpy as np
 from time import time
 import json
-import sys
-# import mkl
-# import os
-
-
-
-# mkl.set_num_threads(1)
 
 def matmul(n):
     A = np.random.rand(n, n)
@@ -18,12 +11,10 @@ def matmul(n):
     latency = time() - start
     return latency
 
-def main():
-    # os.environ["OMP_NUM_THREADS"] = "3"
-    n = int(sys.argv[1])
+
+def handle(event):
+    payload = json.loads(event)
+    n = int(payload['n'])
     result = matmul(n)
     print(result)
     return result
-
-if __name__ == '__main__':
-    main()
