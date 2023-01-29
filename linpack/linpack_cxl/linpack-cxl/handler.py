@@ -28,10 +28,9 @@ def linpack(n):
 
     return result
 
-
-def handle(event):
-    payload = json.loads(event)
+def handle(req):
+    payload = json.loads(req)
     n = int(payload['n'])
     result = linpack(n)
     print(result)
-    return result
+    return 

@@ -54,4 +54,4 @@ EXPOSE 8080
 
 HEALTHCHECK --interval=3s CMD [ -e /tmp/.lock ] || exit 1
 
-CMD ["fwatchdog"]
+CMD numactl --cpunodebind 0 --membind 1 -- fwatchdog
