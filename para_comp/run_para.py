@@ -10,13 +10,15 @@ def main():
     msg = "Run multiple functions in parallel, doing math composition"
     parser = argparse.ArgumentParser(description = msg)
     parser.add_argument('-n', help='number for calculation (integer)')
-    parser.add_argument('-p', help='number of functions (containers) to run in parallel')
+    parser.add_argument('-p', help='number of functions (containers) to run in parallel (12)')
+    parser.add_argument('-e', help='env: <base/cxl>')
     args = parser.parse_args()
     times = int(args.n)
     parallelIndex = int(args.p)
+    env = (args.e)
 
     startTime = GetTime()
-    temp = alu(times, parallelIndex)
+    temp = alu(times, parallelIndex, env)
     tot_exec = 0
     tempdict = eval(temp)
     for execTime in tempdict:
@@ -35,13 +37,13 @@ def main():
 def GetTime():
     return int(round(time.time() * 1000))
 
-def alu(times, parallelIndex):
+def alu(times, parallelIndex, env):
     payload = bytes("{\"n\": %d}" %(times / parallelIndex), encoding="utf8")
     
     resultTexts = []
     threads = []
     for i in range(parallelIndex):
-        t = threading.Thread(target=singleAlu, args=(payload, resultTexts, i))
+        t = threading.Thread(target=singleAlu, args=(payload, resultTexts, i, env))
         threads.append(t)
         resultTexts.append('')
     for i in range(parallelIndex):
@@ -51,17 +53,17 @@ def alu(times, parallelIndex):
 
     return str(resultTexts)
 
-def singleAlu(payload, resultTexts, clientId):
+def singleAlu(payload, resultTexts, clientId, env):
     clientStartTime = GetTime()
-    response = single_invoke(payload)
+    response = single_invoke(payload, env)
     clientEndTime = GetTime()
     clientExecTime = clientEndTime - clientStartTime
     singleAluTimeinfo = "client %d startTime: %s, retTime: %s, execTime %s" %(clientId, clientStartTime, clientEndTime, clientExecTime)
     resultTexts[clientId] = str(response['execTime'])
     print("client %d finished" %clientId)
 
-def single_invoke(payload):
-    url = "http://127.0.0.1:8080/function/seq-cxl"
+def single_invoke(payload, env):
+    url = "http://127.0.0.1:8080/function/seq-" + env
     print("payload is:", payload)
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, payload, headers=headers)
